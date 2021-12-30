@@ -1,0 +1,92 @@
+﻿<Window x:Class="WargamingCalculator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WargamingCalculator"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="800" Width="700">
+    <Window.DataContext>
+        <local:MainWindowViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="270"/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel Grid.Column="0" Margin="20,0,20,0">
+            <Label Content="Create a weapon profile"/>
+            <Label Content="Attacks"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.Attacks}"/>
+            <Label Content="Strength"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.Strength}"/>
+            <Label Content="WeaponSkill"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.WeaponSkill}"/>
+            <Label Content="BallisticSkill"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.BallisticSkill}"/>
+            <Label Content="Damage"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.Damage}"/>
+            <Label Content="Ranged Weapon"/>
+            <CheckBox Content="Yes" IsChecked="{Binding CurrentWeaponProfile.IsRangedWeapon}"/>
+            <Label Content="HitModifier"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.HitModifier}"/>
+            <Label Content="WoundModifier"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.WoundModifier}"/>
+            <Label Content="StrengthModifier"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.StrengthModifier}"/>
+            <Label Content="AP"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.AP}"/>
+            <Label Content="Mortal 6's"/>
+            <CheckBox Content="Mortals 6's" IsChecked="{Binding CurrentWeaponProfile.MortalSixes}"/>
+            <Label Content="Re-Roll Hits of 1"/>
+            <CheckBox Content="Yes" IsChecked="{Binding CurrentWeaponProfile.ReRollOnes}"/>
+            <Label Content="Re-Roll Failed Hits"/>
+            <CheckBox Content="Yes" IsChecked="{Binding CurrentWeaponProfile.ReRollFailedHits}"/>
+            <Label Content="Re-Roll Failed Wounds"/>
+            <CheckBox Content="Yes" IsChecked="{Binding CurrentWeaponProfile.ReRollFailedWounds}"/>
+            <Label Content="Number Of"/>
+            <TextBox Text="{Binding CurrentWeaponProfile.NumberOf}" />
+            <Button Content="Add Profile" Command="{Binding AddWeaponProfileCommand}" Width="100" Height="50" Margin="0,15,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Margin="0,0,20,0">
+            <Label Content="Create a combatant profile"/>
+            <Label Content="Toughness"/>
+            <TextBox Text="{Binding CurrentCombatantProfile.Toughness}"/>
+            <Label Content="Wounds"/>
+            <TextBox Text="{Binding CurrentCombatantProfile.Wounds}"/>
+            <Label Content="SavingThrow"/>
+            <TextBox Text="{Binding CurrentCombatantProfile.SavingThrow}"/>
+            <Label Content="InvulnerableSave"/>
+            <TextBox Text="{Binding CurrentCombatantProfile.InvulnerableSave}"/>
+            <Label Content="FeelNoPain"/>
+            <TextBox Text="{Binding CurrentCombatantProfile.FeelNoPain}"/>
+            <Label Content="Negative Hit Modifier"/>
+            <TextBox Text="{Binding CurrentCombatantProfile.HitModifier}"/>
+            <Label Content="Negative Damage Modifier"/>
+            <TextBox Text="{Binding CurrentCombatantProfile.DamageModifier}"/>
+            <Label Content="Negative Toughness Modifier"/>
+            <TextBox Text="{Binding CurrentCombatantProfile.ToughnessModifier}"/>
+            <Button Content="Calculate" Command="{Binding CalculateOutputCommand}" Width="100" Height="50" Margin="0,15,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2">
+            <Label Content="Results"/>
+            <Label Content="Hits Made"/>
+            <TextBlock Text="{Binding HitCount, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Potential Wounds"/>
+            <TextBlock Text="{Binding WoundCount, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Wounds Saved"/>
+            <TextBlock Text="{Binding SaveCount, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Damage Made"/>
+            <TextBlock Text="{Binding Damage, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Mortal Wounds"/>
+            <TextBlock Text="{Binding MortalWounds, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Base Potential Damage Total (Without Mortals)"/>
+            <TextBlock Text="{Binding PotentialDamageTotal, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Content="Reset" Command="{Binding ResetCommand}" Width="100" Height="50" Margin="0,15,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>
