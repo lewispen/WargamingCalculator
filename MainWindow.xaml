@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WargamingCalculator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="700">
+        Title="MainWindow" Height="900" Width="700">
     <Window.DataContext>
         <local:MainWindowViewModel/>
     </Window.DataContext>
@@ -30,7 +30,7 @@
             <TextBox Text="{Binding CurrentWeaponProfile.Damage}"/>
             <Label Content="Ranged Weapon"/>
             <CheckBox Content="Yes" IsChecked="{Binding CurrentWeaponProfile.IsRangedWeapon}"/>
-            <Label Content="HitModifier"/>
+            <Label Content="HitModifier (+ / -)"/>
             <TextBox Text="{Binding CurrentWeaponProfile.HitModifier}"/>
             <Label Content="WoundModifier"/>
             <TextBox Text="{Binding CurrentWeaponProfile.WoundModifier}"/>
@@ -42,6 +42,8 @@
             <CheckBox Content="Mortals 6's" IsChecked="{Binding CurrentWeaponProfile.MortalSixes}"/>
             <Label Content="Re-Roll Hits of 1"/>
             <CheckBox Content="Yes" IsChecked="{Binding CurrentWeaponProfile.ReRollOnes}"/>
+            <Label Content="Re-Roll Wounds of 1"/>
+            <CheckBox Content="Yes" IsChecked="{Binding CurrentWeaponProfile.ReRollWoundOnes}"/>
             <Label Content="Re-Roll Failed Hits"/>
             <CheckBox Content="Yes" IsChecked="{Binding CurrentWeaponProfile.ReRollFailedHits}"/>
             <Label Content="Re-Roll Failed Wounds"/>
@@ -86,6 +88,10 @@
             <TextBlock Text="{Binding MortalWounds, UpdateSourceTrigger=PropertyChanged}"/>
             <Label Content="Base Potential Damage Total (Without Mortals)"/>
             <TextBlock Text="{Binding PotentialDamageTotal, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Average Wounds Per 100"/>
+            <TextBlock Text="{Binding AverageWounds, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Average Damage Per 100"/>
+            <TextBlock Text="{Binding AverageDamage, UpdateSourceTrigger=PropertyChanged}"/>
             <Button Content="Reset" Command="{Binding ResetCommand}" Width="100" Height="50" Margin="0,15,0,0"/>
         </StackPanel>
     </Grid>

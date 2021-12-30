@@ -6,7 +6,7 @@
 
     public class WeaponProfile
     {
-        public int Attacks { get; set; }
+        public string Attacks { get; set; }
 
         public int Strength { get; set; }
 
@@ -26,13 +26,15 @@
 
         public bool ReRollOnes { get; set; }
 
+        public bool ReRollWoundOnes { get; set; }
+
         public bool ReRollFailedHits { get; set; }
 
         public bool ReRollFailedWounds { get; set; }
 
         public int AP { get; set; }
 
-        public int Damage { get; set; }
+        public string Damage { get; set; }
 
         public bool AlreadyReRolledHits { get; set; }
 

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Windows.Input;
@@ -48,6 +49,10 @@
 
         private int mortalWounds;
 
+        private float averageDamage;
+
+        private float averageWounds;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         #endregion
@@ -69,6 +74,8 @@
             SaveCount = Saves.Count;
             WoundCount = Wounds.Count;
             MortalWounds = 0;
+            AverageDamage = 0;
+            AverageWounds = 0;
 
             addWeaponProfileCommand = new RelayCommand(AddWeaponProfileToList);
             calculateOutputCommand = new RelayCommand(CalculateOutput);
@@ -241,6 +248,32 @@
             }
         }
 
+        public float AverageDamage
+        {
+            get { return averageDamage; }
+            set
+            {
+                if (averageDamage != value)
+                {
+                    averageDamage = value;
+                    OnPropertyChanged("AverageDamage");
+                }
+            }
+        }
+
+        public float AverageWounds
+        {
+            get { return averageWounds; }
+            set
+            {
+                if (averageWounds != value)
+                {
+                    averageWounds = value;
+                    OnPropertyChanged("AverageWounds");
+                }
+            }
+        }
+
         public int PotentialDamageTotal
         {
             get { return potentialDamageTotal; }
@@ -278,32 +311,75 @@
         }
 
         public void CalculateOutput(object obj)
-        {
-            Clear();
-
+        { 
             rand = new Random();
             List<int> hits = new List<int>();
+            AverageDamage = 0;
+            AverageWounds = 0;
 
             if (weaponProfiles != null)
             {
-                foreach (WeaponProfile weaponProfile in weaponProfiles)
+                for (int i = 0; i < 100; i++)
                 {
-                    CurrentHits.Clear();
-                    CurrentWounds.Clear();
-                    CalculateHits(weaponProfile, weaponProfile.Attacks);
-                    Hits.AddRange(CurrentHits);
-                    CalculateWounds(weaponProfile, CurrentHits.Count);
-                    Wounds.AddRange(CurrentWounds);
-                    CurrentSaves.Clear();
-                    int failedSaves = CalculateSaves(weaponProfile, CurrentWounds);
-                    Saves.AddRange(CurrentSaves);
-                    if (CurrentCombatantProfile.FeelNoPain > 0)
+                    AverageDamage += Damage;
+                    AverageWounds += Wounds.Count();
+                    Clear();
+                    foreach (WeaponProfile weaponProfile in weaponProfiles)
                     {
-                        CalculateFNP(weaponProfile, failedSaves);
+                        CurrentHits.Clear();
+                        CurrentWounds.Clear();
+                        int weaponProfileAttacks = 0;
+                        List<string> attacks = weaponProfile.Attacks.Split('d').ToList();
+
+                        if (attacks.Count == 1)
+                        {
+                            weaponProfileAttacks = int.Parse(weaponProfile.Attacks);
+                        }
+                        else
+                        {
+                            int highAttackBracket = int.Parse(attacks[1]) + 1;
+                            weaponProfileAttacks = rand.Next(1, highAttackBracket);
+                        }
+
+                        int weaponProfileDamage = 0;
+                        List<string> damage = weaponProfile.Damage.Split('d').ToList();
+
+                        if(damage.Count == 1)
+                        {
+                            weaponProfileDamage = int.Parse(weaponProfile.Damage);
+                        }
+                        else
+                        {
+                            int highDamageBracket = int.Parse(damage[1]) + 1;
+                            weaponProfileDamage = rand.Next(1, highDamageBracket);
+                        }
+
+                        if (weaponProfileDamage > 1 && CurrentCombatantProfile.DamageModifier != 0)
+                        {
+                            weaponProfileDamage -= 1;
+                        }
+
+                        CalculateHits(weaponProfile, weaponProfileAttacks);
+                        Hits.AddRange(CurrentHits);
+                        CalculateWounds(weaponProfile, CurrentHits.Count, weaponProfileDamage);
+                        Wounds.AddRange(CurrentWounds);
+                        CurrentSaves.Clear();
+                        int failedSaves = CalculateSaves(weaponProfile, CurrentWounds, weaponProfileDamage);
+                        Saves.AddRange(CurrentSaves);
+                        if (CurrentCombatantProfile.FeelNoPain > 0)
+                        {
+                            CalculateFNP(weaponProfile, failedSaves);
+                        }
+
+                        PotentialDamageTotal += CurrentHits.Count * weaponProfileDamage;
+
+
+
+                        SaveResults();
                     }
-                    PotentialDamageTotal += weaponProfile.Attacks * weaponProfile.Damage;
-                    SaveResults();
                 }
+                AverageDamage = AverageDamage / 100;
+                AverageWounds = AverageWounds / 100;
             }
         }
 
@@ -324,12 +400,14 @@
         {
             Clear();
             WeaponProfiles.Clear();
+            AverageDamage = 0;
+            AverageWounds = 0;
         }
 
         private void CalculateHits(WeaponProfile weaponProfile, int attacks)
         {
             List<int> failedHits = new List<int>();
-
+            bool negativeHitModifierApplied = false;
             for (int i = 0; i < attacks; i++)
             {
                 int hitRoll = rand.Next(1, 7);
@@ -339,12 +417,17 @@
                     hitRoll = rand.Next(1, 7);
                 }
 
-                if (hitRoll < 6 && weaponProfile.HitModifier != 0)
+                if (hitRoll < 6 && weaponProfile.HitModifier > 0)
                 {
                     hitRoll += weaponProfile.HitModifier;
                 }
+                else if(hitRoll > 1 && weaponProfile.HitModifier < 0)
+                {
+                    hitRoll += weaponProfile.HitModifier;
+                    negativeHitModifierApplied = true;
+                }
 
-                if (CurrentCombatantProfile.HitModifier != 0)
+                if (CurrentCombatantProfile.HitModifier != 0 && !negativeHitModifierApplied)
                 {
                     hitRoll -= CurrentCombatantProfile.HitModifier;
                 }
@@ -370,7 +453,7 @@
             }
         }
 
-        private void CalculateWounds(WeaponProfile weaponProfile, int hits)
+        private void CalculateWounds(WeaponProfile weaponProfile, int hits, int damage)
         {
             List<int> failedWounds = new List<int>();
             if (hits > 0)
@@ -378,6 +461,11 @@
                 for (int i = 0; i < hits; i++)
                 {
                     int woundroll = rand.Next(1, 7);
+
+                    if (woundroll == 1 && weaponProfile.ReRollWoundOnes && !weaponProfile.AlreadyReRolledWounds)
+                    {
+                        woundroll = rand.Next(1, 7);
+                    }
 
                     if (woundroll == 6 && weaponProfile.MortalSixes)
                     {
@@ -394,7 +482,7 @@
                         if (woundroll >= 2)
                         {
                             CurrentWounds.Add(woundroll);
-                            Damage += weaponProfile.Damage;
+                            Damage += damage;
                         }
                         else
                         {
@@ -406,7 +494,7 @@
                         if (woundroll >= 3)
                         {
                             CurrentWounds.Add(woundroll);
-                            Damage += weaponProfile.Damage;
+                            Damage += damage;
                         }
                         else
                         {
@@ -418,7 +506,7 @@
                         if (woundroll >= 4)
                         {
                             CurrentWounds.Add(woundroll);
-                            Damage += weaponProfile.Damage;
+                            Damage += damage;
                         }
                         else
                         {
@@ -430,7 +518,7 @@
                         if (woundroll >= 5)
                         {
                             CurrentWounds.Add(woundroll);
-                            Damage += weaponProfile.Damage;
+                            Damage += damage;
                         }
                         else
                         {
@@ -442,7 +530,7 @@
                         if (woundroll >= 6)
                         {
                             CurrentWounds.Add(woundroll);
-                            Damage += weaponProfile.Damage;
+                            Damage += damage;
                         }
                         else
                         {
@@ -454,14 +542,14 @@
                 if (failedWounds.Count > 0 && weaponProfile.ReRollFailedWounds && !weaponProfile.AlreadyReRolledWounds)
                 {
                     weaponProfile.AlreadyReRolledWounds = true;
-                    CalculateWounds(weaponProfile, failedWounds.Count);
+                    CalculateWounds(weaponProfile, failedWounds.Count, damage);
                 }
             }
         }
 
-        private int CalculateSaves(WeaponProfile weaponProfile, List<int> wounds)
+        private int CalculateSaves(WeaponProfile weaponProfile, List<int> wounds, int damage)
         {
-            int currentSavingThrow = CurrentCombatantProfile.SavingThrow - weaponProfile.AP;
+            int currentSavingThrow = CurrentCombatantProfile.SavingThrow + weaponProfile.AP;
             List<int> failedSavingThrows = new List<int>();
 
             for (int i = 0; i < wounds.Count; i++)
@@ -473,13 +561,17 @@
                     if (savingThrowRoll >= CurrentCombatantProfile.InvulnerableSave)
                     {
                         CurrentSaves.Add(savingThrowRoll);
-                        Damage -= weaponProfile.Damage;
+                        Damage -= damage;
+                    }
+                    else
+                    {
+                        failedSavingThrows.Add(savingThrowRoll);
                     }
                 }
-                else if (savingThrowRoll > CurrentCombatantProfile.SavingThrow)
+                else if (savingThrowRoll > currentSavingThrow)
                 {
                     CurrentSaves.Add(savingThrowRoll);
-                    Damage -= weaponProfile.Damage;
+                    Damage -= damage;
                 }
                 else
                 {
@@ -497,7 +589,7 @@
                 if (FNPRoll >= CurrentCombatantProfile.FeelNoPain)
                 {
                     Saves.Add(FNPRoll);
-                    Damage -= weaponProfile.Damage;
+                    Damage -= damage;
                 }
             }
         }
