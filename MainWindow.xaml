@@ -86,7 +86,7 @@
             <TextBlock Text="{Binding Damage, UpdateSourceTrigger=PropertyChanged}"/>
             <Label Content="Mortal Wounds"/>
             <TextBlock Text="{Binding MortalWounds, UpdateSourceTrigger=PropertyChanged}"/>
-            <Label Content="Base Potential Damage Total (Without Mortals)"/>
+            <Label Content="Potential Damage with Max Hits (Without Mortals)"/>
             <TextBlock Text="{Binding PotentialDamageTotal, UpdateSourceTrigger=PropertyChanged}"/>
             <Label Content="Average Wounds Per 100"/>
             <TextBlock Text="{Binding AverageWounds, UpdateSourceTrigger=PropertyChanged}"/>

@@ -371,7 +371,7 @@
                             CalculateFNP(weaponProfile, failedSaves);
                         }
 
-                        PotentialDamageTotal += CurrentHits.Count * weaponProfileDamage;
+                        PotentialDamageTotal += weaponProfileAttacks * weaponProfileDamage;
 
 
 
