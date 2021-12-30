@@ -321,7 +321,7 @@
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    AverageDamage += Damage;
+                    AverageDamage += Damage + MortalWounds;
                     AverageWounds += Wounds.Count();
                     Clear();
                     foreach (WeaponProfile weaponProfile in weaponProfiles)
